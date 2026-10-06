@@ -12,6 +12,7 @@ int main(int argc, char **argv)
     char child_text[21];
     char ram_text[21];
     char runtime_text[21];
+    char model_text[21];
     unsigned long rss_kb;
     unsigned long runtime_seconds;
 
@@ -22,7 +23,8 @@ int main(int argc, char **argv)
     if (process_find(&procs) != 0)
         return 1;
     if (process_total_rss_kb(&procs, &rss_kb) != 0 ||
-        process_runtime_seconds(procs.serve_pid, &runtime_seconds) != 0) {
+        process_runtime_seconds(procs.serve_pid, &runtime_seconds) != 0 ||
+        process_model_names(&procs, model_text, sizeof(model_text)) != 0) {
         process_free(&procs);
         return 1;
     }
@@ -39,7 +41,7 @@ int main(int argc, char **argv)
     printf("| %-22s | %-20s |\n", "Child processes", child_text);
     printf("| %-22s | %-20s |\n", "Ollama RAM (RSS)", ram_text);
     printf("| %-22s | %-20s |\n", "Ollama runtime", runtime_text);
-    printf("| %-22s | %-20s |\n", "LLM model running", "Llama 3.2 3B");
+    printf("| %-22s | %-20s |\n", "LLM model running", model_text);
     printf("| %-22s | %-20s |\n", "CPU usage", "28%%");
     printf("| %-22s | %-20s |\n", "RAM usage", "6.4 / 16 GB");
     printf("| %-22s | %-20s |\n", "VRAM usage", "4.2 / 8 GB");

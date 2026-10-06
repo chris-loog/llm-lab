@@ -34,4 +34,11 @@ int process_total_rss_kb(const ollama_procs_t *procs, unsigned long *kb);
  */
 int process_runtime_seconds(pid_t pid, unsigned long *seconds);
 
+/*
+ * Text for the model row: names of the loaded models joined by ", " and cut
+ * with "..." to fit size (at least 4), "none loaded", "unknown", or
+ * "n/a (run with sudo)". Returns 0 on success, -1 after printing an error.
+ */
+int process_model_names(const ollama_procs_t *procs, char *buf, size_t size);
+
 #endif
