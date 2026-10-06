@@ -259,3 +259,43 @@ void process_free(ollama_procs_t *procs)
     procs->children = NULL;
     procs->child_count = 0;
 }
+
+int process_rss_kb(pid_t pid, unsigned long *kb)
+{
+    char buf[FILE_BUF_SIZE];
+    long length = read_proc_file(pid, "status", buf, sizeof(buf));
+    const char *line;
+
+    *kb = 0;
+    if (length == PROC_GONE)
+        return 0;
+    if (length < 0)
+        return -1;
+
+    /* Zombies have no address space, so the kernel omits the VmRSS line. */
+    line = strstr(buf, "\nVmRSS:");
+    if (line == NULL)
+        return 0;
+    if (sscanf(line + strlen("\nVmRSS:"), "%lu", kb) != 1) {
+        fprintf(stderr, "error: bad VmRSS in /proc/%d/status\n", (int)pid);
+        return -1;
+    }
+    return 0;
+}
+
+int process_total_rss_kb(const ollama_procs_t *procs, unsigned long *kb)
+{
+    unsigned long part;
+
+    *kb = 0;
+    if (process_rss_kb(procs->serve_pid, &part) != 0)
+        return -1;
+    *kb += part;
+
+    for (size_t i = 0; i < procs->child_count; i++) {
+        if (process_rss_kb(procs->children[i], &part) != 0)
+            return -1;
+        *kb += part;
+    }
+    return 0;
+}

@@ -19,4 +19,13 @@ int process_find(ollama_procs_t *out);
 
 void process_free(ollama_procs_t *procs);
 
+/*
+ * Resident memory (VmRSS) in kB. A process that exited or has no VmRSS line
+ * (zombie) counts as 0. Returns 0 on success, -1 after printing an error.
+ */
+int process_rss_kb(pid_t pid, unsigned long *kb);
+
+/* Sum of process_rss_kb over serve and all children. */
+int process_total_rss_kb(const ollama_procs_t *procs, unsigned long *kb);
+
 #endif
