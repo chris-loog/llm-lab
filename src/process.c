@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define PROC_GONE (-2)
 #define FILE_BUF_SIZE 4096
@@ -297,5 +298,67 @@ int process_total_rss_kb(const ollama_procs_t *procs, unsigned long *kb)
             return -1;
         *kb += part;
     }
+    return 0;
+}
+
+static int read_uptime(double *seconds)
+{
+    FILE *file = fopen("/proc/uptime", "r");
+
+    if (file == NULL) {
+        fprintf(stderr, "error: cannot open /proc/uptime: %s\n", strerror(errno));
+        return -1;
+    }
+    if (fscanf(file, "%lf", seconds) != 1) {
+        fprintf(stderr, "error: cannot parse /proc/uptime\n");
+        fclose(file);
+        return -1;
+    }
+    fclose(file);
+    return 0;
+}
+
+/* starttime is field 22 of /proc/<pid>/stat, in clock ticks since boot. */
+static int read_start_ticks(pid_t pid, unsigned long long *ticks)
+{
+    char buf[FILE_BUF_SIZE];
+    long length = read_proc_file(pid, "stat", buf, sizeof(buf));
+    const char *rest;
+
+    if (length == PROC_GONE) {
+        fprintf(stderr, "error: ollama is not running\n");
+        return -1;
+    }
+    if (length < 0)
+        return -1;
+
+    /* comm (field 2) may contain spaces and ')', so parse after the last ')'. */
+    rest = strrchr(buf, ')');
+    if (rest == NULL ||
+        sscanf(rest + 1,
+               " %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %llu",
+               ticks) != 1) {
+        fprintf(stderr, "error: cannot parse /proc/%d/stat\n", (int)pid);
+        return -1;
+    }
+    return 0;
+}
+
+int process_runtime_seconds(pid_t pid, unsigned long *seconds)
+{
+    unsigned long long start_ticks;
+    double uptime;
+    double runtime;
+    long ticks_per_second = sysconf(_SC_CLK_TCK);
+
+    if (ticks_per_second <= 0) {
+        fprintf(stderr, "error: cannot read clock ticks per second\n");
+        return -1;
+    }
+    if (read_start_ticks(pid, &start_ticks) != 0 || read_uptime(&uptime) != 0)
+        return -1;
+
+    runtime = uptime - (double)start_ticks / (double)ticks_per_second;
+    *seconds = runtime > 0 ? (unsigned long)runtime : 0;
     return 0;
 }

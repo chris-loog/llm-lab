@@ -28,4 +28,10 @@ int process_rss_kb(pid_t pid, unsigned long *kb);
 /* Sum of process_rss_kb over serve and all children. */
 int process_total_rss_kb(const ollama_procs_t *procs, unsigned long *kb);
 
+/*
+ * Seconds since the process started. Returns 0 on success, -1 after printing
+ * an error; if the process is gone that error is "ollama is not running".
+ */
+int process_runtime_seconds(pid_t pid, unsigned long *seconds);
+
 #endif

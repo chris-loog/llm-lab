@@ -19,3 +19,19 @@ void monitor_format_size(unsigned long kb, char *buf, size_t size)
 
     snprintf(buf, size, "%lu.%lu GiB", gib_tenths / 10, gib_tenths % 10);
 }
+
+void monitor_format_duration(unsigned long seconds, char *buf, size_t size)
+{
+    unsigned long minutes = seconds / 60;
+    unsigned long hours = minutes / 60;
+    unsigned long days = hours / 24;
+
+    if (days > 0)
+        snprintf(buf, size, "%lud %luh", days, hours % 24);
+    else if (hours > 0)
+        snprintf(buf, size, "%luh %lum", hours, minutes % 60);
+    else if (minutes > 0)
+        snprintf(buf, size, "%lum %lus", minutes, seconds % 60);
+    else
+        snprintf(buf, size, "%lus", seconds);
+}
