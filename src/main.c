@@ -1,6 +1,15 @@
 #include <stdio.h>
 
-int main(void) {
+#include "cli.h"
+
+int main(int argc, char **argv) {
+    cli_options_t options;
+
+    if (cli_parse(argc, argv, &options) != 0)
+        return 2;
+    if (options.command == CMD_HELP)
+        return 0;
+
     printf("+------------------------+----------------------+\n");
     printf("| %-22s | %-20s |\n", "Metric", "Value");
     printf("+------------------------+----------------------+\n");
