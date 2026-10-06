@@ -1,0 +1,23 @@
+# Build output
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+
+# Binaries and objects
+/llm-lab
+*.o
+*.a
+*.so
+a.out
+
+# Editor and tooling
+.vscode/
+.idea/
+.cache/
+*.swp
+.DS_Store
+
+# Local Claude settings (skills in .claude/skills are committed)
+.claude/settings.local.json
