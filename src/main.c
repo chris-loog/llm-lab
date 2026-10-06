@@ -1,18 +1,30 @@
 #include <stdio.h>
 
 #include "cli.h"
+#include "process.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     cli_options_t options;
+    ollama_procs_t procs;
+    char pid_text[21];
+    char child_text[21];
 
     if (cli_parse(argc, argv, &options) != 0)
         return 2;
     if (options.command == CMD_HELP)
         return 0;
+    if (process_find(&procs) != 0)
+        return 1;
+
+    snprintf(pid_text, sizeof(pid_text), "%d", (int)procs.serve_pid);
+    snprintf(child_text, sizeof(child_text), "%zu", procs.child_count);
 
     printf("+------------------------+----------------------+\n");
     printf("| %-22s | %-20s |\n", "Metric", "Value");
     printf("+------------------------+----------------------+\n");
+    printf("| %-22s | %-20s |\n", "Ollama serve PID", pid_text);
+    printf("| %-22s | %-20s |\n", "Child processes", child_text);
     printf("| %-22s | %-20s |\n", "LLM model running", "Llama 3.2 3B");
     printf("| %-22s | %-20s |\n", "CPU usage", "28%%");
     printf("| %-22s | %-20s |\n", "RAM usage", "6.4 / 16 GB");
@@ -20,5 +32,6 @@ int main(int argc, char **argv) {
     printf("| %-22s | %-20s |\n", "GPU load", "63%%");
     printf("+------------------------+----------------------+\n");
 
+    process_free(&procs);
     return 0;
 }
