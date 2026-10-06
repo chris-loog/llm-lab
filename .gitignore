@@ -19,5 +19,12 @@ a.out
 *.swp
 .DS_Store
 
-# Local Claude settings (skills in .claude/skills are committed)
-.claude/settings.local.json
+# LLM assistant files (kept locally, not part of the submission)
+.claude/
+/skills/
+CLAUDE.md
+PROGRESS.md
+AGENTS.md
+.codex/
+.junie/
+.copilot/
