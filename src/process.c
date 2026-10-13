@@ -533,9 +533,9 @@ static int walk_manifests(char *path, size_t size, const char *digest, manifest_
     return result;
 }
 
-/* manifests/<host>/<namespace>/<name>/<tag> becomes "<name>:<tag>", or "<namespace>/<name>:<tag>". */
-static int model_name_from_path(const char *manifest, size_t prefix_length, char *name,
-                                size_t size)
+/* manifests/<host>/<namespace>/<name>/<tag> becomes "<name>:<tag>", or "<namespace>/<name>:<tag>".
+ */
+static int model_name_from_path(const char *manifest, size_t prefix_length, char *name, size_t size)
 {
     const char *host_end = strchr(manifest + prefix_length + 1, '/');
     const char *model;

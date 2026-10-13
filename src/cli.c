@@ -14,11 +14,10 @@
 
 static void print_usage(FILE *stream)
 {
-    fprintf(stream,
-            "Usage:\n"
-            "  llm-lab status             show Ollama and system usage once\n"
-            "  llm-lab status --watch N   redraw every N seconds (1-3600), Ctrl+C exits\n"
-            "  llm-lab --help             show this text\n");
+    fprintf(stream, "Usage:\n"
+                    "  llm-lab status             show Ollama and system usage once\n"
+                    "  llm-lab status --watch N   redraw every N seconds (1-3600), Ctrl+C exits\n"
+                    "  llm-lab --help             show this text\n");
 }
 
 static int fail(const char *fmt, ...)
@@ -50,8 +49,7 @@ static int parse_interval(const char *text, int *seconds)
     /* strtol does not clear errno on success, so a stale ERANGE would count. */
     errno = 0;
     value = strtol(text, &end, 10);
-    if (end == text || *end != '\0' || errno == ERANGE || value < WATCH_MIN ||
-        value > WATCH_MAX)
+    if (end == text || *end != '\0' || errno == ERANGE || value < WATCH_MIN || value > WATCH_MAX)
         return fail("invalid interval '%s' (use %d-%d)", text, WATCH_MIN, WATCH_MAX);
 
     *seconds = (int)value;
