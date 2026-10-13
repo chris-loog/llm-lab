@@ -379,6 +379,83 @@ int process_runtime_seconds(pid_t pid, unsigned long *seconds)
     return 0;
 }
 
+/* utime (field 14) + stime (field 15) of /proc/<pid>/stat, in clock ticks. */
+static int read_cpu_ticks(pid_t pid, unsigned long long *ticks)
+{
+    char buf[FILE_BUF_SIZE];
+    long length = read_proc_file(pid, "stat", buf, sizeof(buf));
+    unsigned long long utime;
+    unsigned long long stime;
+    const char *rest;
+
+    if (length < 0)
+        return (int)length;
+
+    /* comm (field 2) may contain spaces and ')', so parse after the last ')'. */
+    rest = strrchr(buf, ')');
+    if (rest == NULL || sscanf(rest + 1, " %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %llu %llu",
+                               &utime, &stime) != 2) {
+        fprintf(stderr, "error: cannot parse /proc/%d/stat\n", (int)pid);
+        return -1;
+    }
+    *ticks = utime + stime;
+    return 0;
+}
+
+/* A child that exited is left out of the sample; serve exiting is an error. */
+int process_cpu_sample(const ollama_procs_t *procs, cpu_sample_t *out)
+{
+    out->items = malloc((procs->child_count + 1) * sizeof(*out->items));
+    out->count = 0;
+    if (out->items == NULL) {
+        fprintf(stderr, "error: out of memory\n");
+        return -1;
+    }
+
+    for (size_t i = 0; i <= procs->child_count; i++) {
+        pid_t pid = i == 0 ? procs->serve_pid : procs->children[i - 1];
+        unsigned long long ticks;
+        int status = read_cpu_ticks(pid, &ticks);
+
+        if (status == PROC_GONE && i > 0)
+            continue;
+        if (status == PROC_GONE)
+            fprintf(stderr, "error: ollama is not running\n");
+        if (status != 0) {
+            process_cpu_sample_free(out);
+            return -1;
+        }
+        out->items[out->count].pid = pid;
+        out->items[out->count].ticks = ticks;
+        out->count++;
+    }
+    return 0;
+}
+
+void process_cpu_sample_free(cpu_sample_t *sample)
+{
+    free(sample->items);
+    sample->items = NULL;
+    sample->count = 0;
+}
+
+/* Only PIDs in both samples count, so a runner that starts or stops mid-window is ignored. */
+unsigned long long process_cpu_ticks_delta(const cpu_sample_t *before, const cpu_sample_t *after)
+{
+    unsigned long long delta = 0;
+
+    for (size_t i = 0; i < after->count; i++) {
+        for (size_t j = 0; j < before->count; j++) {
+            if (before->items[j].pid != after->items[i].pid)
+                continue;
+            if (after->items[i].ticks >= before->items[j].ticks)
+                delta += after->items[i].ticks - before->items[j].ticks;
+            break;
+        }
+    }
+    return delta;
+}
+
 #define MANIFEST_BUF_SIZE 32768
 #define MODEL_LIST_SIZE 512
 #define BLOB_MARKER "/blobs/sha256-"

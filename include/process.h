@@ -44,4 +44,26 @@ int process_runtime_seconds(pid_t pid, unsigned long *seconds);
  */
 int process_model_names(const ollama_procs_t *procs, char *buf, size_t size);
 
+typedef struct {
+    pid_t pid;
+    unsigned long long ticks; /* utime + stime */
+} cpu_entry_t;
+
+typedef struct {
+    cpu_entry_t *items; /* heap array, freed by process_cpu_sample_free */
+    size_t count;
+} cpu_sample_t;
+
+/*
+ * CPU ticks (utime + stime) of serve and every child that still exists.
+ * Returns 0 on success, -1 after printing an error; if serve is gone that
+ * error is "ollama is not running".
+ */
+int process_cpu_sample(const ollama_procs_t *procs, cpu_sample_t *out);
+
+void process_cpu_sample_free(cpu_sample_t *sample);
+
+/* Ticks used between two samples, counting only PIDs present in both. */
+unsigned long long process_cpu_ticks_delta(const cpu_sample_t *before, const cpu_sample_t *after);
+
 #endif
