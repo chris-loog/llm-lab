@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: MIT */
+/* AI assistance: written by Claude (Anthropic) on request, design decided by the student. */
+
 #define _POSIX_C_SOURCE 200809L
 
 #include "process.h"
