@@ -46,7 +46,8 @@ Bad input prints an error to stderr and exits with code 2.
 
 ## Tested on
 
-Ubuntu 26.04.1 LTS, kernel 7.0.0-34-generic, gcc 15.2.0, CMake 4.2.3.
+Ubuntu 26.04.1 LTS, kernel 7.0.0-38-generic, gcc 15.2.0, CMake 4.2.3, Ollama 0.34.2
+with an AMD GPU (`amdgpu`).
 
 ## AI assistance
 

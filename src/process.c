@@ -649,7 +649,7 @@ static int model_for_runner(pid_t pid, char *name, size_t size)
 
     if (!split_blob_path(blob, root, sizeof(root) - strlen("/manifests"), digest, sizeof(digest)))
         return MODEL_UNKNOWN;
-    strcat(root, "/manifests");
+    snprintf(root + strlen(root), sizeof(root) - strlen(root), "/manifests");
 
     status = walk_manifests(root, sizeof(root), digest, &match);
     if (status == PROC_DENIED)
