@@ -41,4 +41,11 @@ int monitor_read_memory(unsigned long *used_kb, unsigned long *total_kb);
 /* One decimal and a percent sign: "212.4 %". */
 void monitor_format_percent(double percent, char *buf, size_t size);
 
+/*
+ * Print the status table. watch_seconds is 0 for one table, or the redraw
+ * interval; watch mode runs until Ctrl+C. Returns the exit code: 0, or 1 after
+ * printing an error to stderr.
+ */
+int monitor_run(int watch_seconds);
+
 #endif
