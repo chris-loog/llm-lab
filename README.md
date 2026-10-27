@@ -51,11 +51,10 @@ with an AMD GPU (`amdgpu`).
 
 ## AI assistance
 
-Most of the code was written by Claude (Anthropic) through Claude Code, on the
-student's request. The student decided the design (the decisions were agreed in
-question-and-answer sessions before each feature) and checked the results
-against `top`, `free`, `ps` and the raw `/sys` and `/proc` files. Every source
-file starts with a comment that says so.
+The student decided the design. Claude (Anthropic), used through Claude Code,
+helped implement it. The student checked the results against `top`, `free`,
+`ps` and the raw `/sys` and `/proc` files. Every source file starts with a
+comment that says so.
 
 ## License
 
